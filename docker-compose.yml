@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: product-service
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=product-db
+      - DB_USER=root
+      - DB_PASSWORD=root1
+      - DB_NAME=productdb
+    depends_on:
+      product-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--host=product-db", "--user=root", "--password=root1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  product-db:
+    image: mysql:8.0
+    container_name: product-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root1
+      MYSQL_DATABASE: productdb
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - product-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  cart-service:
+    build:
+      context: ./cart-service
+      dockerfile: Dockerfile
+    container_name: cart-service
+    ports:
+      - "3002:3002"
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: cart-db
+      DB_PORT: 3306
+      DB_DATABASE: cartdb
+      DB_USERNAME: root
+      DB_PASSWORD: root1
+      APP_ENV: docker
+    depends_on:
+      cart-db:
+        condition: service_healthy
+    # command: bash -c "./wait-for-it.sh cart-db:3306 -- php artisan migrate && php -S 0.0.0.0:3002 -t public"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "cart-db", "-u", "root", "-proot1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  cart-db:
+    image: mysql:8.0
+    container_name: cart-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root1
+      MYSQL_DATABASE: cartdb
+    volumes:
+      - cart-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "cart-db", "-u", "root", "-proot1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  product-db-data:
+  cart-db-data:
