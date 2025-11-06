@@ -40,6 +40,38 @@ services:
       retries: 5
       start_period: 30s
 
+  review-service:
+    build:
+      context: ./review-service
+      dockerfile: Dockerfile
+    container_name: review-service
+    ports:
+      - "3003:3003"
+    environment:
+      - MONGO_USER=root
+      - MONGO_PASSWORD=Dev@root23
+      - MONGO_HOST=review-db
+    depends_on:
+      - review-db
+    command: ["python", "app.py"]
+    healthcheck:
+      test: ["CMD-SHELL", "mongo --eval 'db.runCommand({ ping: 1 })' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  review-db:
+    image: mongo:6.0
+    container_name: review-db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: Dev@root23
+    volumes:
+      - review-db-data:/data/db
+
   cart-service:
     build:
       context: ./cart-service
@@ -82,6 +114,8 @@ services:
       retries: 5
       start_period: 30s
 
+
 volumes:
   product-db-data:
   cart-db-data:
+  review-db-data:
