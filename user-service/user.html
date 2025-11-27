@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .error-text {
+            font-size: 0.85rem;
+            color: #dc3545;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <div class="container py-5">
+
+        <h2 class="mb-4 text-center fw-bold">User Management</h2>
+
+        <!-- ALERT SUCCESS -->
+        <div id="successAlert" class="alert alert-success d-none fw-bold text-center"></div>
+
+        <!-- FORM -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white fw-bold">
+                Tambah User Baru
+            </div>
+
+            <div class="card-body">
+
+                <form id="userForm" class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Name</label>
+                        <input id="name" type="text" class="form-control">
+                        <div id="nameError" class="error-text"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Email</label>
+                        <input id="email" type="email" class="form-control">
+                        <div id="emailError" class="error-text"></div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Role</label>
+                        <select id="role" class="form-select">
+                            <option value="">-- Pilih Role --</option>
+                            <option value="customer">Customer</option>
+                            <option value="seller">Seller</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <div id="roleError" class="error-text"></div>
+                    </div>
+
+                    <div class="col-12 d-flex justify-content-center">
+                        <button type="submit" class="btn btn-success btn-sm px-3">Tambah User</button>
+                    </div>
+
+
+                </form>
+
+            </div>
+        </div>
+
+
+
+        <!-- TABLE -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white fw-bold">
+                Daftar User
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-hover text-center">
+                    <thead>
+                        <tr>
+                            <th width="60">ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th width="120">Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:4000/users";
+
+        function clearErrors() {
+            document.getElementById("nameError").innerText = "";
+            document.getElementById("emailError").innerText = "";
+            document.getElementById("roleError").innerText = "";
+        }
+
+        function showSuccess(message) {
+            const alertBox = document.getElementById("successAlert");
+            alertBox.innerText = message;
+            alertBox.classList.remove("d-none");
+
+            setTimeout(() => {
+                alertBox.classList.add("d-none");
+            }, 3000);
+        }
+
+        // Load user ke tabel
+        async function loadUsers() {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = "";
+
+            data.forEach(user => {
+                tbody.innerHTML += `
+                <tr>
+                    <td>${user.id}</td>
+                    <td class="text-start">${user.name}</td>
+                    <td class="text-start">${user.email}</td>
+                    <td><span class="badge bg-secondary">${user.role}</span></td>
+                </tr>
+            `;
+            });
+        }
+
+        // Submit form dengan validasi per-field
+        document.getElementById("userForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const role = document.getElementById("role").value;
+
+            let hasError = false;
+
+            // VALIDASI PER FIELD
+            if (!name) {
+                document.getElementById("nameError").innerText = "Nama wajib diisi.";
+                hasError = true;
+            }
+
+            if (!email) {
+                document.getElementById("emailError").innerText = "Email wajib diisi.";
+                hasError = true;
+            } else if (!email.includes("@")) {
+                document.getElementById("emailError").innerText = "Format email tidak valid.";
+                hasError = true;
+            }
+
+            if (!role) {
+                document.getElementById("roleError").innerText = "Role wajib dipilih.";
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            // Kirim ke API
+            const res = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, role })
+            });
+
+            const result = await res.json();
+
+            if (!res.ok) {
+                if (result.message.includes("Email")) {
+                    document.getElementById("emailError").innerText = result.message;
+                } else {
+                    alert(result.message);
+                }
+                return;
+            }
+
+            // ➜ Tampilkan alert sukses
+            showSuccess(`User "${name}" berhasil ditambahkan!`);
+
+            loadUsers();
+            e.target.reset();
+        });
+
+        loadUsers();
+    </script>
+
+</body>
+
+</html>

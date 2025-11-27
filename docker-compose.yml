@@ -1,6 +1,21 @@
 version: '3.8'
 
 services:
+
+  main-app:
+    build:
+      context: ./main-app
+      dockerfile: Dockerfile
+    ports:
+      - 3005:3005
+    depends_on:
+      - product-service
+      - cart-service
+      - review-service
+    environment:
+      - HOSTNAME=main-app
+    command: ["python", "app.py"]
+
   product-service:
     build:
       context: ./product-service
@@ -114,8 +129,49 @@ services:
       retries: 5
       start_period: 30s
 
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "4000:4000"
+    environment:
+      - DB_HOST=user-db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=userdb
+      - PORT=4000
+    depends_on:
+      user-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--host=user-db", "--user=root", "--password=root"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  user-db:
+    image: mysql:8
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=userdb
+    ports:
+      - "3307:3306"
+    volumes:
+      - user-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
 
 volumes:
   product-db-data:
   cart-db-data:
   review-db-data:
+  user-db-data:

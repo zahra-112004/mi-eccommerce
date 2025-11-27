@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product['data']['name'] }} Detail</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style type="text/css">
+        body { margin: 0 !important; padding: 0 !important; background-color: #eeeeee; }
+    </style>
+</head>
+<body bgcolor="#eeeeee">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+
+            <td align="center" bgcolor="#eeeeee">
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;">
+                    <tr>
+                        <td align="center" style="font-size:0; padding: 35px;" bgcolor="#ff7361">
+                            <div style="display:inline-block; max-width:50%; min-width:100px; vertical-align:top; width:100%;">
+                                <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <tr>
+                                        <td align="left" style="font-family: Helvetica, Arial, sans-serif; font-size: 36px; font-weight: 800; color: #ffffff;">
+                                            <h1 style="margin:0;">{{ product['data']['name'] }}</h1>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div style="display:inline-block; max-width:50%; min-width:100px; vertical-align:top; width:100%;" class="mobile-hide">
+                                <table align="right" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <tr>
+                                        <td align="right">
+                                            <p style="font-size: 18px; font-weight: 400; margin: 0; color: #ffffff;">
+                                                IDR {{ product['data']['price'] }} &nbsp;
+                                                <img src="https://img.icons8.com/dusk/64/000000/add-shopping-cart.png" width="27" height="23" style="display: inline-block; border: 0px;" />
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding: 35px; background-color: #ffffff;">
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;">
+                                <tr>
+                                    <td align="center">
+    
+                                        <img src="{{ url_for('static', filename='Handphone.jpg') }}" width="190" height="187" style="display: block; border: 0px;" alt="Gambar Handphone" /><br>
+                                        <h2 style="font-size: 30px; font-weight: 800; color: #333333; margin: 0;">
+                                            Sold out: {{ cart }}
+                                        </h2>
+                                        <p style="font-size: 16px; color: #777777;">{{ product['data']['description'] }}</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="padding: 25px 0;">
+                                        <a href="#" style="font-size: 18px; color: #fff; background-color: #ed8e20; padding: 15px 30px; border-radius: 5px; text-decoration: none; display: inline-block;">Finish Order</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Bagian review tetap -->
+                    <tr>
+                        <td align="center" style="padding: 35px; background-color: #ffffff; border-top: 1px solid #dddddd;">
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center"> <img src="https://img.icons8.com/dusk/64/000000/ms-share-point.png" width="37" height="37" style="display: block; border: 0px;" /> </td>
+                                </tr>
+                                <tr>
+                                    <td align="center" style="font-size: 14px; font-weight: 800; color: #333333;">
+                                        <p>Reviews</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left" style="font-size: 14px; color: #777777;">
+                                        {% for r in reviews %}
+                                            <strong>Ratings: {{ r['review']['ratings'] }}</strong><br>
+                                            {{ r['review']['comment'] }}<br>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
